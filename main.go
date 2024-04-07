@@ -35,7 +35,7 @@ func (t *Root) Run(args *Args, reply *Result) error {
 	}
 
 	*reply = Result{Stdout: stdout.String(), Stderr: stderr.String(), Code: code}
-	log.Printf("%+v\n", reply)
+	log.Printf("reply: %v", reply)
 	return nil
 }
 
@@ -51,11 +51,11 @@ func main() {
 		for scanner.Scan() {
 			line := scanner.Text()
 			var reply = &Result{}
-			err = client.Call("Arith.Multiply", &Args{Command: line}, reply)
+			err = client.Call("Root.Run", &Args{Command: line}, reply)
 			if err != nil {
 				panic(err)
 			}
-			log.Printf("%v\n", reply)
+			log.Printf("reply: %v", reply)
 		}
 
 	case "server":
@@ -63,7 +63,7 @@ func main() {
 		rpc.Register(arith)
 		l, err := net.Listen("tcp", os.Args[2])
 		if err != nil {
-			log.Fatal("listen error:", err)
+			log.Fatal(err)
 		}
 
 		for {
