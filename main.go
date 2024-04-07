@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"log"
 	"net"
 	"net/rpc"
@@ -58,6 +59,22 @@ func main() {
 			log.Printf("reply: %v", reply)
 		}
 
+	case "client-oneshot":
+		client, err := rpc.Dial("tcp", os.Args[2])
+		if err != nil {
+			panic(err)
+		}
+
+		var reply = &Result{}
+		err = client.Call("Root.Run", &Args{Command: os.Args[3]}, reply)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Fprint(os.Stdout, reply.Stdout)
+		fmt.Fprint(os.Stderr, reply.Stderr)
+		os.Exit(reply.Code)
+
 	case "server":
 		arith := new(Root)
 		rpc.Register(arith)
@@ -73,5 +90,7 @@ func main() {
 			}
 			go rpc.ServeConn(conn)
 		}
+	default:
+		panic("invalid argument")
 	}
 }
